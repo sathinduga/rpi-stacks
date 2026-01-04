@@ -22,7 +22,7 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     env_file:
-      - ~/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
+      - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
 
 volumes:
   grafana-alloy-data:
