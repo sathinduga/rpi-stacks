@@ -22,10 +22,10 @@ Path: `/stack/grafana`
 
 ## Pull Secrets
 ```bash
-infisical export --env=prod --path=/stacks/grafana --format=dotenv > ~/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
+infisical export --env=prod --path=/stacks/grafana --format=dotenv > /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
 ```
 
 ## Verify
 ```bash
-cat ~/HomeLab/infisical-secrets/.infisical.stack.grafana.env
+cat /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
 ```
