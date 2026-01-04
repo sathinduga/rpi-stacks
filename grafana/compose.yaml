@@ -21,6 +21,7 @@ services:
       - traefik-proxy
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
+      - TZ="America/New_York"
     env_file:
       - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
 

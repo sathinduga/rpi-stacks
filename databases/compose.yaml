@@ -1,0 +1,31 @@
+name: databases
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./pg_init_ha.sh:/docker-entrypoint-initdb.d/pg_init_ha.sh
+      - ./pg_init_n8n.sh:/docker-entrypoint-initdb.d/pg_init_n8n.sh
+    networks:
+      - traefik-proxy
+    env_file:
+      - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.databases.postgres.env
+    environment:
+      - TZ="America/New_York"
+      - PGTZ="America/New_York"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres.entrypoints=postgres"
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+
+volumes:
+  postgres-data:
+    name: databases-postgres-data
+
+networks:
+  traefik-proxy:
+    external: true
