@@ -1,0 +1,86 @@
+// ============ EXISTING CONFIG (keep as is) ============
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+loki.source.docker "containers" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.containers.targets
+  forward_to = [loki.write.grafanacloud.receiver]
+  relabel_rules = loki.relabel.docker_labels.rules
+}
+
+loki.relabel "docker_labels" {
+  forward_to = []
+  
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    target_label  = "container_name"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_image"]
+    target_label  = "image"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "compose_service"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "compose_project"
+  }
+}
+
+loki.write "grafanacloud" {
+  endpoint {
+    url = env("GRAFANA_CLOUD_URL")
+    basic_auth {
+      username = env("GRAFANA_CLOUD_USERNAME")
+      password = env("GRAFANA_CLOUD_PASSWORD")
+    }
+  }
+}
+
+// ============ NEW: METRICS ============
+prometheus.scrape "traefik" {
+  targets = [{"__address__" = "traefik:8080"}]
+  metrics_path = "/metrics"
+  forward_to = [prometheus.remote_write.grafanacloud.receiver]
+}
+
+prometheus.remote_write "grafanacloud" {
+  endpoint {
+    url = env("GRAFANA_CLOUD_PROMETHEUS_URL")
+    basic_auth {
+      username = env("GRAFANA_CLOUD_PROMETHEUS_USERNAME")
+      password = env("GRAFANA_CLOUD_PASSWORD")
+    }
+  }
+}
+
+// ============ NEW: TRACING ============
+otelcol.receiver.otlp "default" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [otelcol.exporter.otlphttp.grafanacloud.input]
+  }
+}
+
+otelcol.exporter.otlphttp "grafanacloud" {
+  client {
+    endpoint = env("GRAFANA_CLOUD_TEMPO_URL")
+    auth     = otelcol.auth.basic.grafanacloud.handler
+  }
+}
+
+otelcol.auth.basic "grafanacloud" {
+  username = env("GRAFANA_CLOUD_TEMPO_USERNAME")
+  password = env("GRAFANA_CLOUD_PASSWORD")
+}

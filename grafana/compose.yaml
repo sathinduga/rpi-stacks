@@ -1,0 +1,33 @@
+name: grafana
+
+services:
+  alloy:
+    image: grafana/alloy:latest
+    container_name: grafana-alloy
+    restart: unless-stopped
+    ports:
+      - "12345:12345"
+      - "4318:4318"
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy:ro
+      - grafana-alloy-data:/var/lib/alloy/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: 
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+      - "/etc/alloy/config.alloy"
+    networks:
+      - traefik-proxy
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    env_file:
+      - ~/HomeLab/infisical-secrets/.infisical.stack.grafana.env
+
+volumes:
+  grafana-alloy-data:
+    name: grafana-alloy-data
+
+networks:
+  traefik-proxy:
+    external: true
