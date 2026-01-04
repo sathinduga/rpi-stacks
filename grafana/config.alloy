@@ -1,13 +1,15 @@
-// ============ EXISTING CONFIG (keep as is) ============
+// ============ LOGGING ============
 logging {
   level  = "info"
   format = "logfmt"
 }
 
+// ============ DOCKER DISCOVERY ============
 discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
 }
 
+// ============ LOGS ============
 loki.source.docker "containers" {
   host       = "unix:///var/run/docker.sock"
   targets    = discovery.docker.containers.targets
@@ -34,21 +36,25 @@ loki.relabel "docker_labels" {
     source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
     target_label  = "compose_project"
   }
+  rule {
+    source_labels = ["__meta_docker_network_name"]
+    target_label  = "network"
+  }
 }
 
 loki.write "grafanacloud" {
   endpoint {
-    url = env("GRAFANA_CLOUD_URL")
+    url = env("GRAFANA_CLOUD_LOKI_URL")
     basic_auth {
-      username = env("GRAFANA_CLOUD_USERNAME")
-      password = env("GRAFANA_CLOUD_PASSWORD")
+      username = env("GRAFANA_CLOUD_LOKI_USERNAME")
+      password = env("GRAFANA_CLOUD_API_KEY")
     }
   }
 }
 
-// ============ NEW: METRICS ============
+// ============ METRICS ============
 prometheus.scrape "traefik" {
-  targets = [{"__address__" = "traefik:8080"}]
+  targets    = [{"__address__" = "traefik:8080"}]
   metrics_path = "/metrics"
   forward_to = [prometheus.remote_write.grafanacloud.receiver]
 }
@@ -58,12 +64,12 @@ prometheus.remote_write "grafanacloud" {
     url = env("GRAFANA_CLOUD_PROMETHEUS_URL")
     basic_auth {
       username = env("GRAFANA_CLOUD_PROMETHEUS_USERNAME")
-      password = env("GRAFANA_CLOUD_PASSWORD")
+      password = env("GRAFANA_CLOUD_API_KEY")
     }
   }
 }
 
-// ============ NEW: TRACING ============
+// ============ TRACING ============
 otelcol.receiver.otlp "default" {
   http {
     endpoint = "0.0.0.0:4318"
@@ -82,5 +88,5 @@ otelcol.exporter.otlphttp "grafanacloud" {
 
 otelcol.auth.basic "grafanacloud" {
   username = env("GRAFANA_CLOUD_TEMPO_USERNAME")
-  password = env("GRAFANA_CLOUD_PASSWORD")
+  password = env("GRAFANA_CLOUD_API_KEY")
 }
