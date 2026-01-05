@@ -70,16 +70,20 @@ prometheus.remote_write "grafanacloud" {
 }
 
 // ============ TRACING ============
-otelcol.receiver.otlp "default" {
+otelcol.receiver.otlp "otlp_receiver" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
   http {
     endpoint = "0.0.0.0:4318"
   }
+
   output {
-    traces = [otelcol.exporter.otlphttp.grafanacloud.input]
+    traces = [otelcol.exporter.otlp.grafanacloud.input]
   }
 }
 
-otelcol.exporter.otlphttp "grafanacloud" {
+otelcol.exporter.otlp "grafanacloud" {
   client {
     endpoint = env("GRAFANA_CLOUD_TEMPO_URL")
     auth     = otelcol.auth.basic.grafanacloud.handler
