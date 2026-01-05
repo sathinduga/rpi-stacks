@@ -8,8 +8,13 @@ services:
     user: postgres
     volumes:
       - postgres-data:/var/lib/postgresql
-      - ./pg_init_ha.sh:/docker-entrypoint-initdb.d/pg_init_ha.sh
-      - ./pg_init_n8n.sh:/docker-entrypoint-initdb.d/pg_init_n8n.sh
+    configs:
+      - source: pg_init_ha
+        target: /docker-entrypoint-initdb.d/pg_init_ha.sh
+        mode: 0755
+      - source: pg_init_n8n
+        target: /docker-entrypoint-initdb.d/pg_init_n8n.sh
+        mode: 0755
     networks:
       - traefik-proxy
     env_file:
@@ -28,6 +33,12 @@ services:
       - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.postgres.entrypoints=postgres"
       - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+
+configs:
+  pg_init_ha:
+    file: ./pg_init_ha.sh
+  pg_init_n8n:
+    file: ./pg_init_n8n.sh
 
 volumes:
   postgres-data:

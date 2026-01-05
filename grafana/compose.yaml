@@ -9,9 +9,12 @@ services:
       - "12345:12345"
       - "4318:4318"
     volumes:
-      - ./config.alloy:/etc/alloy/custom.alloy:ro
       - grafana-alloy-data:/var/lib/alloy/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    configs:
+      - source: alloy_config
+        target: /etc/alloy/custom.alloy
+        mode: 0644
     command: 
       - "run"
       - "--server.http.listen-addr=0.0.0.0:12345"
@@ -24,6 +27,10 @@ services:
       - TZ=America/New_York
     env_file:
       - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
+
+configs:
+  alloy_config:
+    file: ./config.alloy
 
 volumes:
   grafana-alloy-data:
