@@ -12,7 +12,7 @@ services:
       - grafana-alloy-data:/var/lib/alloy/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
     configs:
-      - source: alloy-config
+      - source: alloy_config
         target: /etc/alloy/config.alloy
         mode: 0644
     command: 
@@ -29,7 +29,7 @@ services:
       - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
 
 configs:
-  alloy-config:
+  alloy_config:
     file: ./config.alloy
 
 volumes:
