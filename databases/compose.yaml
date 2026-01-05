@@ -5,6 +5,7 @@ services:
     image: postgres:18
     container_name: postgres
     restart: unless-stopped
+    user: postgres
     volumes:
       - postgres-data:/var/lib/postgresql
       - ./pg_init_ha.sh:/docker-entrypoint-initdb.d/pg_init_ha.sh
@@ -14,8 +15,14 @@ services:
     env_file:
       - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.databases.postgres.env
     environment:
-      - TZ="America/New_York"
-      - PGTZ="America/New_York"
+      - TZ=America/New_York
+      - PGTZ=America/New_York
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
