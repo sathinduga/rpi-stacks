@@ -5,6 +5,7 @@ services:
     image: grafana/alloy:latest
     container_name: grafana-alloy
     restart: unless-stopped
+    mem_limit: 512m
     ports:
       - "12345:12345"
       - "4318:4318"

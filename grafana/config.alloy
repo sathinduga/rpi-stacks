@@ -44,10 +44,10 @@ loki.relabel "docker_labels" {
 
 loki.write "grafanacloud" {
   endpoint {
-    url = env("GRAFANA_CLOUD_LOKI_URL")
+    url = sys.env.GRAFANA_CLOUD_LOKI_URL
     basic_auth {
-      username = env("GRAFANA_CLOUD_LOKI_USERNAME")
-      password = env("GRAFANA_CLOUD_API_KEY")
+      username = sys.env.GRAFANA_CLOUD_LOKI_USERNAME
+      password = sys.env.GRAFANA_CLOUD_API_KEY
     }
   }
 }
@@ -62,14 +62,20 @@ prometheus.scrape "traefik" {
 
 prometheus.remote_write "grafanacloud" {
   endpoint {
-    url = env("GRAFANA_CLOUD_PROMETHEUS_URL")
+    url = sys.env.GRAFANA_CLOUD_PROMETHEUS_URL
     basic_auth {
-      username = env("GRAFANA_CLOUD_PROMETHEUS_USERNAME")
-      password = env("GRAFANA_CLOUD_API_KEY")
+      username = sys.env.GRAFANA_CLOUD_PROMETHEUS_USERNAME
+      password = sys.env.GRAFANA_CLOUD_API_KEY
     }
     queue_config {
-      max_samples_per_send = 500
-      batch_send_deadline  = "30s"
+      max_samples_per_send = 200       // Reduced to prevent rate limiting
+      batch_send_deadline  = "60s"     // Increased for better batching
+      capacity             = 5000      // Limit queue size
+      max_shards           = 5         // Limit concurrent shards
+      min_shards           = 1
+    }
+    metadata_config {
+      send_interval = "5m"             // Reduce metadata frequency
     }
   }
 }
@@ -90,12 +96,12 @@ otelcol.receiver.otlp "otlp_receiver" {
 
 otelcol.exporter.otlp "grafanacloud" {
   client {
-    endpoint = env("GRAFANA_CLOUD_TEMPO_URL")
+    endpoint = sys.env.GRAFANA_CLOUD_TEMPO_URL
     auth     = otelcol.auth.basic.grafanacloud.handler
   }
 }
 
 otelcol.auth.basic "grafanacloud" {
-  username = env("GRAFANA_CLOUD_TEMPO_USERNAME")
-  password = env("GRAFANA_CLOUD_API_KEY")
+  username = sys.env.GRAFANA_CLOUD_TEMPO_USERNAME
+  password = sys.env.GRAFANA_CLOUD_API_KEY
 }
