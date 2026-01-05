@@ -6,7 +6,7 @@ services:
     container_name: postgres
     restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
       - ./pg_init_ha.sh:/docker-entrypoint-initdb.d/pg_init_ha.sh
       - ./pg_init_n8n.sh:/docker-entrypoint-initdb.d/pg_init_n8n.sh
     networks:
