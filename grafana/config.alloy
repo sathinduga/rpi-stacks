@@ -56,6 +56,7 @@ loki.write "grafanacloud" {
 prometheus.scrape "traefik" {
   targets    = [{"__address__" = "traefik:8085"}]
   metrics_path = "/metrics"
+  scrape_interval = "60s"
   forward_to = [prometheus.remote_write.grafanacloud.receiver]
 }
 
@@ -65,6 +66,10 @@ prometheus.remote_write "grafanacloud" {
     basic_auth {
       username = env("GRAFANA_CLOUD_PROMETHEUS_USERNAME")
       password = env("GRAFANA_CLOUD_API_KEY")
+    }
+    queue_config {
+      max_samples_per_send = 500
+      batch_send_deadline  = "30s"
     }
   }
 }
