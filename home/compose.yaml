@@ -1,0 +1,32 @@
+name: home
+
+services:
+  homeassistant:
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    container_name: homeassistant
+    restart: unless-stopped
+    volumes:
+      - /home/sathindu/HomeLab/volume-mounts/home-homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    privileged: true
+    network_mode: host
+    env_file:
+      - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.home.homeassistant.env
+    environment:
+      - TZ=America/New_York
+    depends_on:
+      - matterserver
+
+  matterserver:
+    image: ghcr.io/matter-js/python-matter-server:stable
+    container_name: matterserver
+    restart: unless-stopped
+    volumes:
+      - /home/sathindu/HomeLab/volume-mounts/home-matterserver/data:/data
+      - /run/dbus:/run/dbus:ro
+    network_mode: host
+    security_opt: 
+      - apparmor:unconfined
+    environment:
+      - TZ=America/New_York
