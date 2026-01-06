@@ -28,6 +28,27 @@ services:
       - "traefik.http.routers.code-server.middlewares=code-server-headers@file"
       - "traefik.http.services.code-server.loadbalancer.server.port=8443"
 
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    environment:
+      - TZ=America/New_York
+      - PUID=1000
+      - PGID=1000
+      - HOMEPAGE_ALLOWED_HOSTS=home.pi.lan
+    volumes:
+      - /home/sathindu/HomeLab/volume-mounts/tools-homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.rule=Host(`home.pi.lan`)"
+      - "traefik.http.routers.homepage.entrypoints=websecure"
+      - "traefik.http.routers.homepage.tls=true"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+
 networks:
   traefik-proxy:
     external: true
