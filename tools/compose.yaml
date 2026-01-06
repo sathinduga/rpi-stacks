@@ -64,6 +64,7 @@ services:
       - N8N_PROTOCOL=https
       - N8N_PORT=5678
       - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=external
       - N8N_SECURE_COOKIE=true
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_DATABASE=n8n_db
@@ -78,6 +79,20 @@ services:
       - "traefik.http.routers.n8n.entrypoints=websecure"
       - "traefik.http.routers.n8n.tls=true"
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+  
+  n8n-task-runner:
+    image: n8nio/runners:latest
+    container_name: n8n-task-runner
+    restart: unless-stopped
+    environment:
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n:5679
+    env_file:
+      - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.tools.n8n-runners.env
+    networks:
+      - traefik-proxy
+    depends_on:
+      - n8n
 
 
 volumes:
