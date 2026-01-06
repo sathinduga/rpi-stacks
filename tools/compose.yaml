@@ -49,6 +49,42 @@ services:
       - "traefik.http.routers.homepage.tls=true"
       - "traefik.http.services.homepage.loadbalancer.server.port=3000"
 
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    volumes:
+      - tools-n8n-data:/home/node/.n8n
+    networks:
+      - traefik-proxy
+    environment:
+      - GENERIC_TIMEZONE=America/New_York
+      - TZ=America/New_York
+      - N8N_HOST=n8n.pi.lan
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_SECURE_COOKIE=true
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=n8n_db
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=n8n_user
+    env_file:
+      - /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.tools.n8n.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.pi.lan`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls=true"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+
+volumes:
+  tools-n8n-data:
+    name: tools-n8n-data
+
+
 networks:
   traefik-proxy:
     external: true
