@@ -24,8 +24,3 @@ Path: `/stack/grafana`
 ```bash
 infisical export --env=prod --path=/stacks/grafana --format=dotenv > /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
 ```
-
-## Verify
-```bash
-cat /home/sathindu/HomeLab/infisical-secrets/.infisical.stacks.grafana.env
-```
